@@ -1,6 +1,6 @@
 package com.company.alpicoapi.model;
 
 public enum BarrierType {
-    dependency, time;
+    DEPENDENCY, TIME, CONST;
 }
 

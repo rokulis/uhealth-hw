@@ -7,6 +7,7 @@ import com.company.alpicoapi.model.BarrierType;
 import com.company.alpicoapi.model.MagicItem;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class MagicItemUtils {
@@ -50,10 +51,17 @@ public class MagicItemUtils {
 
         Barrier timeBarrier = jwtPayload.getBarriers()
                 .stream()
-                .filter(barrier -> barrier.getType() == BarrierType.time)
+                .filter(barrier -> barrier.getType() == BarrierType.TIME)
                 .findFirst()
                 .orElse(null);
 
+        Barrier constBarrier = jwtPayload.getBarriers()
+                .stream()
+                .filter(barrier -> barrier.getType() == BarrierType.CONST)
+                .findFirst()
+                .orElse(null);
+
+        jwtPayload.setConstBarrier(constBarrier);
         jwtPayload.setTimeBarrier(timeBarrier);
         jwtPayload.setToken(magicToken);
         return jwtPayload;
@@ -66,7 +74,7 @@ public class MagicItemUtils {
 
         List<MagicItem> dependencies = jwtPayload.getBarriers()
                 .stream()
-                .filter(barrier -> barrier.getType() == BarrierType.dependency)
+                .filter(barrier -> barrier.getType() == BarrierType.DEPENDENCY)
                 .flatMap(barrier -> barrier.getOn().stream())
                 .map(list::get).collect(Collectors.toList());
 

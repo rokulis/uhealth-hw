@@ -15,6 +15,7 @@ public class ThreadUtils {
             for (Thread th : threads)
                 th.join();
         } catch (InterruptedException e) {
+
             throw ApiException.internalError("err.internal");
         }
     }

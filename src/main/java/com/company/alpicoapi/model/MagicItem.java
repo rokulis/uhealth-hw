@@ -12,12 +12,14 @@ public class MagicItem {
     private long epoch;
     private String seed;
     private String magic;
-    private List<Barrier> barriers;
+    private List<Barrier> barriers = new ArrayList<>();
     private long iat;
     private String token;
     private String result;
+
     private TaskState taskState;
     private Barrier timeBarrier;
+    private Barrier constBarrier;
     private List<MagicItem> dependencies = new ArrayList<MagicItem>();
 
     public int getIndex() {
@@ -128,6 +130,15 @@ public class MagicItem {
         return this;
     }
 
+    public Barrier getConstBarrier() {
+        return constBarrier;
+    }
+
+    public MagicItem setConstBarrier(Barrier constBarrier) {
+        this.constBarrier = constBarrier;
+        return this;
+    }
+
     public static Comparator<MagicItem> timeBarrierComparator() {
         return (jp1, jp2) -> {
             boolean jp1HasTimeBarrier = jp1.getTimeBarrier() != null;
@@ -145,5 +156,16 @@ public class MagicItem {
             Integer from2 = jp2.getTimeBarrier().getFrom();
             return from1.compareTo(from2);
         };
+    }
+
+    @Override
+    public String toString() {
+//        return "MagicItem{" +
+//                "index=" + index +
+//                ", taskState=" + taskState +
+//                ", timeBarrier=" + timeBarrier +
+//                ", dependencies=" + dependencies +
+//                '}';
+        return "hi";
     }
 }

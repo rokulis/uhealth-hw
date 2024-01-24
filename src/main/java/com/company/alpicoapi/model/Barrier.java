@@ -1,12 +1,16 @@
 package com.company.alpicoapi.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class Barrier {
+
     private BarrierType type;
     private List<Integer> on;
     private Integer from; // Optional: might be null for non-time barriers
     private Integer until; // Optional: might be null for non-time barriers
+    private String value;
 
     public BarrierType getType() {
         return type;
@@ -44,11 +48,23 @@ public class Barrier {
         return this;
     }
 
+    public String getValue() {
+        return value;
+    }
+
+    public Barrier setValue(String value) {
+        this.value = value;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "Barrier{" +
-                "from=" + from +
+                "type=" + type +
+                ", on=" + on +
+                ", from=" + from +
                 ", until=" + until +
+                ", value='" + value + '\'' +
                 '}';
     }
 }

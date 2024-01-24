@@ -4,6 +4,7 @@ import com.company.alpicoapi.api.AlpicoApi;
 import com.company.alpicoapi.dto.AlpicoResponseDTO;
 import com.company.alpicoapi.dto.Issue;
 import com.company.alpicoapi.dto.TaskState;
+import com.company.alpicoapi.exceptions.ApiException;
 import com.company.alpicoapi.model.MagicItem;
 import com.company.alpicoapi.utils.ThreadUtils;
 import org.slf4j.Logger;
@@ -33,13 +34,20 @@ public class Consumer implements Runnable {
             MagicItem take = null;
             try {
                 take = queue.take();
+                logger.info("Taking: {}", take);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 e.printStackTrace();
             }
             if (take.getIndex() == ThreadUtils.DEAD_PILL) {
+                logger.info("returning deadpill");
                 return;
             }
             solve(magic, take, payloads);
+            if (queue.size() == 0) {
+                logger.info("returning");
+                return;
+            }
         }
     }
 
@@ -50,7 +58,7 @@ public class Consumer implements Runnable {
 
         item.setTaskState(TaskState.IN_PROGRESS);
 
-        AlpicoResponseDTO apiResponseDTO = alpicoApi.getPart(magic, AlpicoApi.createRequest(item.getToken(), list));
+        AlpicoResponseDTO apiResponseDTO = alpicoApi.getPart(magic, AlpicoApi.createRequest(item, list));
 
         if (apiResponseDTO.isSuccess()) {
             item.setResult(apiResponseDTO.getPayload());
@@ -69,12 +77,26 @@ public class Consumer implements Runnable {
         if (issue.getMessage().startsWith("Request was made too")) {
             if (issue.getParams().getActual() > issue.getParams().getExpected().getBefore()) {
                 item.setTaskState(TaskState.FAILED);
-                throw new RuntimeException("err.solving.error");
+                Thread.currentThread().interrupt();
+                throw ApiException.internalError("err.solving.toolate")
+                        .addLabel("actual", issue.getParams().getActual())
+                        .addLabel("expectedBefore", issue.getParams().getExpected().getBefore());
             }
+
+            int waitingTime = issue.getParams().getExpected().getAfter() - issue.getParams().getActual();
+            logger.info("waiting for: {}", waitingTime);
+            try {
+                Thread.sleep(waitingTime);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            logger.info("waited for: {}, going go retry", waitingTime);
             retrySolve(item, list);
             return;
         }
 
+        logger.error("unexcepted retry");
         retrySolve(item, list);
     }
 

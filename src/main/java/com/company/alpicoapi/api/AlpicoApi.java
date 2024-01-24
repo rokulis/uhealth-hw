@@ -17,12 +17,14 @@ import java.util.*;
 public class AlpicoApi {
     private final RestTemplate restTemplate;
 
+    private static final String API_URL = "https://europe-west1-uh-protected.cloudfunctions.net/aipico2/";
+
     public AlpicoApi(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     public String[] initialize(String magic) {
-        ResponseEntity<String[]> response = restTemplate.getForEntity("https://europe-west1-uh-protected.cloudfunctions.net/aipico/" + magic, String[].class);
+        ResponseEntity<String[]> response = restTemplate.getForEntity(API_URL + magic, String[].class);
         return response.getBody();
     }
 
@@ -30,7 +32,7 @@ public class AlpicoApi {
         Stopwatch stopwatch = new Stopwatch();
         stopwatch.start();
         try {
-            ResponseEntity<AlpicoResponseDTO> postResponse = restTemplate.exchange("https://europe-west1-uh-protected.cloudfunctions.net/aipico/" + magic, HttpMethod.POST, dto, AlpicoResponseDTO.class);
+            ResponseEntity<AlpicoResponseDTO> postResponse = restTemplate.exchange(API_URL + magic, HttpMethod.POST, dto, AlpicoResponseDTO.class);
             AlpicoResponseDTO body = postResponse.getBody();
             return new AlpicoResponseDTO()
                     .setSuccess(true)
@@ -40,7 +42,7 @@ public class AlpicoApi {
         }
     }
 
-    public static HttpEntity<AlpicoRequestDTO> createRequest(String token, List<MagicItem> responses) {
+    public static HttpEntity<AlpicoRequestDTO> createRequest(MagicItem magicItem, List<MagicItem> responses) {
         List<MagicItem> copy = new ArrayList<>(responses);
         copy.sort(Comparator.comparingInt(MagicItem::getIndex));
 
@@ -53,8 +55,12 @@ public class AlpicoApi {
         }
 
         AlpicoRequestDTO request = new AlpicoRequestDTO()
-                .setPayload(token)
+                .setPayload(magicItem.getToken())
                 .setResponses(tokenResultMap);
+
+        if (magicItem.getConstBarrier() != null) {
+            request.setProof(magicItem.getConstBarrier().getValue());
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

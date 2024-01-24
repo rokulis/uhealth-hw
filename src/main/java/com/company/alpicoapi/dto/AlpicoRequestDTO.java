@@ -6,6 +6,7 @@ import java.util.Map;
 public class AlpicoRequestDTO {
 
     private String payload;
+    private String proof;
     private Map<Integer, String> responses = new HashMap<>();
 
     public String getPayload() {
@@ -14,6 +15,15 @@ public class AlpicoRequestDTO {
 
     public AlpicoRequestDTO setPayload(String payload) {
         this.payload = payload;
+        return this;
+    }
+
+    public String getProof() {
+        return proof;
+    }
+
+    public AlpicoRequestDTO setProof(String proof) {
+        this.proof = proof;
         return this;
     }
 

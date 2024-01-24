@@ -14,7 +14,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Service
 public class MagicService {
 
-    private static final int NUMBER_OF_CONSUMERS = 8;
+    private static final int NUMBER_OF_CONSUMERS = 1;
 
     private final AlpicoApi alpicoApi;
 
@@ -30,6 +30,8 @@ public class MagicService {
         LinkedBlockingQueue<MagicItem> taskQueue = new LinkedBlockingQueue<>(readyToSolveList);
 
         ThreadUtils.addDeadpills(taskQueue, NUMBER_OF_CONSUMERS);
+
+//        new Consumer(magic, alpicoApi, taskQueue, readyToSolveList).run();
 
         List<Thread> threads = ThreadUtils.run(
                 new Consumer(magic, alpicoApi, taskQueue, readyToSolveList),
